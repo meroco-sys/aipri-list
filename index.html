@@ -40,23 +40,46 @@
             outline: none;
             background: #fff;
         }
-        .tab-menu {
+        /* シリーズタブ */
+        .series-menu {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .series-btn {
+            padding: 10px 14px;
+            font-size: 13px;
+            border: none;
+            background-color: #e0e0e0;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        .series-btn.active {
+            background-color: #ff1493;
+            color: #fff;
+        }
+        /* 弾・章タブ */
+        .bullet-menu {
             display: flex;
             justify-content: center;
             gap: 5px;
             margin-bottom: 20px;
             flex-wrap: wrap;
         }
-        .tab-btn {
-            padding: 8px 16px;
-            font-size: 14px;
+        .bullet-btn {
+            padding: 6px 12px;
+            font-size: 12px;
             border: none;
             background-color: #ddd;
             cursor: pointer;
-            border-radius: 8px 8px 0 0;
+            border-radius: 6px;
             font-weight: bold;
         }
-        .tab-btn.active {
+        .bullet-btn.active {
             background-color: var(--primary-color);
             color: #fff;
         }
@@ -91,11 +114,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-        }
-        .card-bullet {
-            font-size: 11px;
-            color: #666;
-            text-align: left;
         }
         .modal {
             display: none;
@@ -173,22 +191,26 @@
     <h1>コーデリスト</h1>
 
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="コーデ名や型番で検索 (例: OA3-027)">
+        <input type="text" id="searchInput" placeholder="コーデ名や型番で検索 (例: PM1-027)">
     </div>
 
-    <div class="tab-menu" id="tabMenu">
-        <button class="tab-btn" data-bullet="1">1弾</button>
-        <button class="tab-btn" data-bullet="2">2弾</button>
-        <button class="tab-btn active" data-bullet="3">3弾</button>
-        <button class="tab-btn" data-bullet="4">4弾</button>
+    <!-- 1階層目：シリーズ選択タブ -->
+    <div class="series-menu" id="seriesMenu">
+        <button class="series-btn active" data-series="プリマジ">プリマジ</button>
+        <button class="series-btn" data-series="ひみつのアイプリ">ひみつのアイプリ</button>
+        <button class="series-btn" data-series="ひみつのアイプリ リング編">ひみつのアイプリ リング編</button>
+        <button class="series-btn" data-series="おねがいアイプリ">おねがいアイプリ</button>
     </div>
+
+    <!-- 2階層目：弾・章選択タブ（選択されたシリーズによって変化） -->
+    <div class="bullet-menu" id="bulletMenu"></div>
 
     <div class="grid" id="coordinateGrid"></div>
 
     <div class="modal" id="detailModal">
         <div class="modal-content">
             <button class="close-btn" id="closeModal">×</button>
-            <div id="modalBullet" class="card-bullet" style="font-weight: bold; color: #ff69b4;"></div>
+            <div id="modalBulletInfo" style="font-size: 12px; color: #666; font-weight: bold;"></div>
             <h2 id="modalName" style="font-size: 16px; margin: 5px 0;"></h2>
             <img id="modalFullImg" class="modal-full-img" src="" alt="全体像">
             
@@ -197,37 +219,64 @@
     </div>
 
     <script>
+        // 各シリーズごとの弾・章のリスト
+        const seriesBullets = {
+            "プリマジ": ["第1章", "第2章", "第3章", "第4章", "第5章", "第6章", "スタジオ第1・2章", "スタジオ第3・4章", "スタジオ第5・6章", "スタジオ第7・8章", "スタジオ第9章", "スタジオ第10章"],
+            "ひみつのアイプリ": ["1弾", "2弾", "3弾", "4弾"],
+            "ひみつのアイプリ リング編": ["1弾", "2弾"],
+            "おねがいアイプリ": ["1弾", "2弾"]
+        };
+
+        // コーデデータ（series と bullet で管理）
         const coordinateData = [
             {
-                id: "PM-01",
-                bullet: "1弾",
+                id: "pm1-01",
+                series: "プリマジ",
+                bullet: "第1章",
                 name: "ハロウィンフリルブルー",
                 fullImage: "IMG_6032.jpeg",
                 parts: [
-                    { type: "トップス", code: "PM1-027", power: 760, image: "IMG_6027.png" },
-                    { type: "ボトムス", code: "PM1-028", power: 760, image: "IMG_6028.png" },
-                    { type: "シューズ", code: "PM1-029", power: 370, image: "IMG_6029.png" },
-                    { type: "アクセ",   code: "PM1-030", power: 350, image: "IMG_6030.png" }
+                    { type: "トップス", code: "PM1-027", image: "IMG_6027.png" },
+                    { type: "ボトムス", code: "PM1-028", image: "IMG_6028.png" },
+                    { type: "シューズ", code: "PM1-029", image: "IMG_6029.png" },
+                    { type: "アクセ",   code: "PM1-030", image: "IMG_6030.png" }
                 ]
             }
         ];
 
-        let currentBullet = "3"; // 初期表示を1弾に設定
+        let currentSeries = "プリマジ";
+        let currentBullet = "第1章";
 
         const grid = document.getElementById('coordinateGrid');
         const searchInput = document.getElementById('searchInput');
-        const tabMenu = document.getElementById('tabMenu');
+        const seriesMenu = document.getElementById('seriesMenu');
+        const bulletMenu = document.getElementById('bulletMenu');
         const modal = document.getElementById('detailModal');
         const closeModal = document.getElementById('closeModal');
 
-        function renderGrid(bullet, filterKeyword = "") {
+        // 弾タブを描画する関数
+        function renderBulletMenu() {
+            bulletMenu.innerHTML = "";
+            const bullets = seriesBullets[currentSeries] || [];
+            
+            bullets.forEach((bullet, index) => {
+                const btn = document.createElement('button');
+                btn.className = `bullet-btn ${bullet === currentBullet ? 'active' : ''}`;
+                btn.textContent = bullet;
+                btn.setAttribute('data-bullet', bullet);
+                bulletMenu.appendChild(btn);
+            });
+        }
+
+        // 一覧を画面に描画する関数
+        function renderGrid(filterKeyword = "") {
             grid.innerHTML = "";
             
             let targetData = coordinateData.filter(item => {
-                const matchBullet = filterKeyword ? true : item.bullet === (bullet + "弾");
+                const matchSeriesAndBullet = filterKeyword ? true : (item.series === currentSeries && item.bullet === currentBullet);
                 const matchKeyword = item.name.toLowerCase().includes(filterKeyword.toLowerCase()) || 
                                      item.parts.some(p => p.code.toLowerCase().includes(filterKeyword.toLowerCase()));
-                return matchBullet && matchKeyword;
+                return matchSeriesAndBullet && matchKeyword;
             });
 
             if (targetData.length === 0) {
@@ -239,7 +288,6 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.innerHTML = `
-                    <div class="card-bullet">${item.bullet}</div>
                     <img src="${item.fullImage}" alt="${item.name}">
                     <div class="card-name">${item.name}</div>
                 `;
@@ -249,7 +297,7 @@
         }
 
         function openModal(item) {
-            document.getElementById('modalBullet').textContent = item.bullet;
+            document.getElementById('modalBulletInfo').textContent = `${item.series} / ${item.bullet}`;
             document.getElementById('modalName').textContent = item.name;
             document.getElementById('modalFullImg').src = item.fullImage;
 
@@ -261,7 +309,6 @@
                         <div class="part-title">${part.type}</div>
                         <img src="${part.image}" alt="${part.type}">
                         <div style="font-size: 10px; margin-top:3px; font-weight:bold;">${part.code}</div>
-                        <div style="font-size: 10px; color:#e91e63;">バズ: ${part.power}</div>
                     </div>
                 `;
             });
@@ -273,19 +320,36 @@
             if (e.target === modal) modal.classList.remove('active');
         });
 
-        tabMenu.addEventListener('click', (e) => {
-            if (!e.target.classList.contains('tab-btn')) return;
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        // シリーズタブクリック
+        seriesMenu.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('series-btn')) return;
+            document.querySelectorAll('.series-btn').forEach(btn => btn.classList.remove('active'));
             e.target.classList.add('active');
-            currentBullet = e.target.getAttribute('data-bullet');
+            
+            currentSeries = e.target.getAttribute('data-series');
+            currentBullet = seriesBullets[currentSeries][0]; // そのシリーズの最初の弾を選択
             searchInput.value = "";
-            renderGrid(currentBullet);
+            
+            renderBulletMenu();
+            renderGrid();
         });
 
+        // 弾タブクリック
+        bulletMenu.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('bullet-btn')) return;
+            document.querySelectorAll('.bullet-btn').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+            
+            currentBullet = e.target.getAttribute('data-bullet');
+            searchInput.value = "";
+            renderGrid();
+        });
+
+        // 検索時の自動切り替え
         searchInput.addEventListener('input', (e) => {
             const keyword = e.target.value.trim();
             if (keyword === "") {
-                renderGrid(currentBullet);
+                renderGrid();
                 return;
             }
 
@@ -295,10 +359,20 @@
             );
 
             if (foundItem) {
-                const bulletNumber = foundItem.bullet.replace("弾", "");
-                if (currentBullet !== bulletNumber) {
-                    currentBullet = bulletNumber;
-                    document.querySelectorAll('.tab-btn').forEach(btn => {
+                if (currentSeries !== foundItem.series) {
+                    currentSeries = foundItem.series;
+                    document.querySelectorAll('.series-btn').forEach(btn => {
+                        if (btn.getAttribute('data-series') === currentSeries) {
+                            btn.classList.add('active');
+                        } else {
+                            btn.classList.remove('active');
+                        }
+                    });
+                    renderBulletMenu();
+                }
+                if (currentBullet !== foundItem.bullet) {
+                    currentBullet = foundItem.bullet;
+                    document.querySelectorAll('.bullet-btn').forEach(btn => {
                         if (btn.getAttribute('data-bullet') === currentBullet) {
                             btn.classList.add('active');
                         } else {
@@ -308,10 +382,12 @@
                 }
             }
 
-            renderGrid(currentBullet, keyword);
+            renderGrid(keyword);
         });
 
-        renderGrid(currentBullet);
+        // 初期化実行
+        renderBulletMenu();
+        renderGrid();
     </script>
 </body>
 </html>
