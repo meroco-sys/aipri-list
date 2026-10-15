@@ -26,7 +26,6 @@
             font-size: 24px;
             margin-bottom: 15px;
         }
-        /* 検索バー */
         .search-container {
             max-width: 600px;
             margin: 0 auto 15px;
@@ -41,7 +40,6 @@
             outline: none;
             background: #fff;
         }
-        /* タブメニュー */
         .tab-menu {
             display: flex;
             justify-content: center;
@@ -62,7 +60,6 @@
             background-color: var(--primary-color);
             color: #fff;
         }
-        /* コーデ一覧グリッド */
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -100,8 +97,6 @@
             color: #666;
             text-align: left;
         }
-
-        /* モーダル（詳細ポップアップ） */
         .modal {
             display: none;
             position: fixed;
@@ -118,7 +113,7 @@
         .modal-content {
             background: #fff;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             border-radius: 15px;
             padding: 20px 15px;
             position: relative;
@@ -146,8 +141,9 @@
         .parts-container {
             display: flex;
             justify-content: space-around;
-            gap: 8px;
+            gap: 6px;
             margin-top: 15px;
+            flex-wrap: wrap;
         }
         .part-box {
             background: #f9f9f9;
@@ -155,16 +151,17 @@
             border-radius: 8px;
             padding: 6px;
             flex: 1;
+            min-width: 75px;
         }
         .part-box img {
-            width: 70px;
-            height: 70px;
+            width: 60px;
+            height: 60px;
             object-fit: contain;
         }
         .part-title {
             background: var(--primary-color);
             color: #fff;
-            font-size: 11px;
+            font-size: 10px;
             padding: 2px;
             border-radius: 4px;
             margin-bottom: 4px;
@@ -175,23 +172,19 @@
 
     <h1>コーデリスト</h1>
 
-    <!-- 全弾横断検索バー -->
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="コーデ名や型番で検索 (例: スマイルハート)">
+        <input type="text" id="searchInput" placeholder="コーデ名や型番で検索 (例: OA3-027)">
     </div>
 
-    <!-- タブメニュー（必要に応じて弾を追加できます） -->
     <div class="tab-menu" id="tabMenu">
-        <button class="tab-btn active" data-bullet="1">1弾</button>
+        <button class="tab-btn" data-bullet="1">1弾</button>
         <button class="tab-btn" data-bullet="2">2弾</button>
-        <button class="tab-btn" data-bullet="3">3弾</button>
+        <button class="tab-btn active" data-bullet="3">3弾</button>
         <button class="tab-btn" data-bullet="4">4弾</button>
     </div>
 
-    <!-- コーデ一覧グリッド -->
     <div class="grid" id="coordinateGrid"></div>
 
-    <!-- モーダル（詳細画面） -->
     <div class="modal" id="detailModal">
         <div class="modal-content">
             <button class="close-btn" id="closeModal">×</button>
@@ -199,38 +192,27 @@
             <h2 id="modalName" style="font-size: 16px; margin: 5px 0;"></h2>
             <img id="modalFullImg" class="modal-full-img" src="" alt="全体像">
             
-            <div class="parts-container" id="modalParts">
-                <!-- パーツ情報がここに差し込まれます -->
-            </div>
+            <div class="parts-container" id="modalParts"></div>
         </div>
     </div>
 
     <script>
-        // 【ここにコーデデータを追加していきます】
         const coordinateData = [
             {
-                id: "oa1-01",
+                id: "PM-01",
                 bullet: "1弾",
-                name: "レトロポップコーデ",
-                fullImage: "images/oa1_full.png", // 画像のパス
+                name: "ハロウィンフリルブルー",
+                fullImage: "IMG_6032.jpeg",
                 parts: [
-                    { type: "ワンピ", code: "OA1-001", power: 500, image: "images/oa1_001.png" },
-                    { type: "シューズ", code: "OA1-002", power: 300, image: "images/oa1_002.png" }
-                ]
-            },
-            {
-                id: "oa4-01",
-                bullet: "4弾",
-                name: "スマイルハートバズリウムピンク",
-                fullImage: "images/oa4_full.png",
-                parts: [
-                    { type: "ワンピ", code: "OA4-001", power: 760, image: "images/oa4_001.png" },
-                    { type: "シューズ", code: "OA4-002", power: 400, image: "images/oa4_002.png" }
+                    { type: "トップス", code: "PM1-027", power: 760, image: "IMG_6027.png" },
+                    { type: "ボトムス", code: "PM1-028", power: 760, image: "IMG_6028.png" },
+                    { type: "シューズ", code: "PM1-029", power: 370, image: "IMG_6029.png" },
+                    { type: "アクセ",   code: "PM1-030", power: 350, image: "IMG_6030.png" }
                 ]
             }
         ];
 
-        let currentBullet = "1";
+        let currentBullet = "3"; // 初期表示を1弾に設定
 
         const grid = document.getElementById('coordinateGrid');
         const searchInput = document.getElementById('searchInput');
@@ -300,7 +282,6 @@
             renderGrid(currentBullet);
         });
 
-        // 検索時に別弾であっても自動でタブを切り替える機能
         searchInput.addEventListener('input', (e) => {
             const keyword = e.target.value.trim();
             if (keyword === "") {
