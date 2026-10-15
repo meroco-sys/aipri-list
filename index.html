@@ -40,7 +40,6 @@
             outline: none;
             background: #fff;
         }
-        /* シリーズタブ */
         .series-menu {
             display: flex;
             justify-content: center;
@@ -62,7 +61,6 @@
             background-color: #ff1493;
             color: #fff;
         }
-        /* 弾・章タブ */
         .bullet-menu {
             display: flex;
             justify-content: center;
@@ -191,10 +189,9 @@
     <h1>コーデリスト</h1>
 
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="コーデ名や型番で検索 (例: PM1-027)">
+        <input type="text" id="searchInput" placeholder="コーデ名や型番で検索 (例: PM1-001)">
     </div>
 
-    <!-- 1階層目：シリーズ選択タブ -->
     <div class="series-menu" id="seriesMenu">
         <button class="series-btn active" data-series="プリマジ">プリマジ</button>
         <button class="series-btn" data-series="ひみつのアイプリ">ひみつのアイプリ</button>
@@ -202,7 +199,6 @@
         <button class="series-btn" data-series="おねがいアイプリ">おねがいアイプリ</button>
     </div>
 
-    <!-- 2階層目：弾・章選択タブ（選択されたシリーズによって変化） -->
     <div class="bullet-menu" id="bulletMenu"></div>
 
     <div class="grid" id="coordinateGrid"></div>
@@ -219,7 +215,6 @@
     </div>
 
     <script>
-        // 各シリーズごとの弾・章のリスト
         const seriesBullets = {
             "プリマジ": ["第1章", "第2章", "第3章", "第4章", "第5章", "第6章", "スタジオ第1・2章", "スタジオ第3・4章", "スタジオ第5・6章", "スタジオ第7・8章", "スタジオ第9章", "スタジオ第10章"],
             "ひみつのアイプリ": ["1弾", "2弾", "3弾", "4弾"],
@@ -227,30 +222,29 @@
             "おねがいアイプリ": ["1弾", "2弾"]
         };
 
-        // コーデデータ（series と bullet で管理）
         const coordinateData = [
-              {
+            {
                 series: "プリマジ",
                 bullet: "第1章",
                 name: "おととめマーガレット",
-                fullImage: "images/⁠IMG_6053.jpeg", 
+                fullImage: "images/IMG_6053.jpeg",
                 parts: [
-                    { type: "トップス", code: "PM1-001", image: "images/⁠IMG_6054.png" },
-                    { type: "ボトムス", code: "PM1-002", image: "images/⁠IMG_6055.png" },
-                    { type: "シューズ", code: "PM1-003", image: "images/⁠IMG_6056.png" },
-                    { type: "アクセ",   code: "PM1-004", image: "images/⁠IMG_6057.png" }
+                    { type: "トップス", code: "PM1-001", image: "images/IMG_6054.png" },
+                    { type: "ボトムス", code: "PM1-002", image: "images/IMG_6055.png" },
+                    { type: "シューズ", code: "PM1-003", image: "images/IMG_6056.png" },
+                    { type: "アクセ",   code: "PM1-004", image: "images/IMG_6057.png" }
                 ]
             },
             {
                 series: "プリマジ",
                 bullet: "第1章",
                 name: "ハロウィンフリルブルー",
-                fullImage: "images/⁠IMG_6032.jpeg",
+                fullImage: "images/IMG_6032.jpeg",
                 parts: [
-                    { type: "トップス", code: "PM1-027", image: "images/⁠IMG_6027.png" },
-                    { type: "ボトムス", code: "PM1-028", image: "images/⁠IMG_6028.png" },
-                    { type: "シューズ", code: "PM1-029", image: "images/⁠IMG_6029.png" },
-                    { type: "アクセ",   code: "PM1-030", image: "images/⁠IMG_6030.png" }
+                    { type: "トップス", code: "PM1-027", image: "images/IMG_6027.png" },
+                    { type: "ボトムス", code: "PM1-028", image: "images/IMG_6028.png" },
+                    { type: "シューズ", code: "PM1-029", image: "images/IMG_6029.png" },
+                    { type: "アクセ",   code: "PM1-030", image: "images/IMG_6030.png" }
                 ]
             }
         ];
@@ -265,12 +259,11 @@
         const modal = document.getElementById('detailModal');
         const closeModal = document.getElementById('closeModal');
 
-        // 弾タブを描画する関数
         function renderBulletMenu() {
             bulletMenu.innerHTML = "";
             const bullets = seriesBullets[currentSeries] || [];
             
-            bullets.forEach((bullet, index) => {
+            bullets.forEach((bullet) => {
                 const btn = document.createElement('button');
                 btn.className = `bullet-btn ${bullet === currentBullet ? 'active' : ''}`;
                 btn.textContent = bullet;
@@ -279,7 +272,6 @@
             });
         }
 
-        // 一覧を画面に描画する関数
         function renderGrid(filterKeyword = "") {
             grid.innerHTML = "";
             
@@ -331,21 +323,19 @@
             if (e.target === modal) modal.classList.remove('active');
         });
 
-        // シリーズタブクリック
         seriesMenu.addEventListener('click', (e) => {
             if (!e.target.classList.contains('series-btn')) return;
             document.querySelectorAll('.series-btn').forEach(btn => btn.classList.remove('active'));
             e.target.classList.add('active');
             
             currentSeries = e.target.getAttribute('data-series');
-            currentBullet = seriesBullets[currentSeries][0]; // そのシリーズの最初の弾を選択
+            currentBullet = seriesBullets[currentSeries][0];
             searchInput.value = "";
             
             renderBulletMenu();
             renderGrid();
         });
 
-        // 弾タブクリック
         bulletMenu.addEventListener('click', (e) => {
             if (!e.target.classList.contains('bullet-btn')) return;
             document.querySelectorAll('.bullet-btn').forEach(btn => btn.classList.remove('active'));
@@ -356,7 +346,6 @@
             renderGrid();
         });
 
-        // 検索時の自動切り替え
         searchInput.addEventListener('input', (e) => {
             const keyword = e.target.value.trim();
             if (keyword === "") {
@@ -396,7 +385,6 @@
             renderGrid(keyword);
         });
 
-        // 初期化実行
         renderBulletMenu();
         renderGrid();
     </script>
