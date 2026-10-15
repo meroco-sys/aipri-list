@@ -106,12 +106,14 @@
             object-fit: contain;
         }
         .card-name {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
             margin-top: 6px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* 最大2行まで表示する */
+            -webkit-box-orient: vertical;
             overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            line-height: 1.3;
         }
         .modal {
             display: none;
