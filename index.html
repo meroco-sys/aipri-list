@@ -183,18 +183,20 @@
             height: 100%;
             object-fit: contain;
         }
-        /* QRコード上の薄い転載禁止文字 */
+        /* QRコード上の薄い赤字の転載禁止文字 */
         .watermark {
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%) rotate(-25deg);
+            transform: translate(-50%, -50%) rotate(-20deg);
             font-size: 9px;
             font-weight: bold;
-            color: rgba(100, 100, 100, 0.4);
+            color: rgba(255, 0, 50, 0.45); /* 薄い赤色 */
+            line-height: 1.1;
             white-space: nowrap;
             pointer-events: none;
             user-select: none;
+            text-align: center;
         }
         .part-title {
             background: var(--primary-color);
@@ -500,7 +502,7 @@
                         <div class="part-title">${part.type}</div>
                         <div class="part-img-wrapper">
                             <img src="${part.image}" alt="${part.type}">
-                            <div class="watermark">転載禁止</div>
+                            <div class="watermark">mkr<br>転載禁止</div>
                         </div>
                         <div style="font-size: 10px; margin-top:3px; font-weight:bold;">${part.code}</div>
                     </div>
