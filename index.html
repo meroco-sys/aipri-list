@@ -171,10 +171,30 @@
             flex: 1;
             min-width: 75px;
         }
-        .part-box img {
+        /* QRコード画像とウォーターマークを重ねるラッパー */
+        .part-img-wrapper {
+            position: relative;
             width: 60px;
             height: 60px;
+            margin: 0 auto;
+        }
+        .part-img-wrapper img {
+            width: 100%;
+            height: 100%;
             object-fit: contain;
+        }
+        /* QRコード上の薄い転載禁止文字 */
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-25deg);
+            font-size: 9px;
+            font-weight: bold;
+            color: rgba(100, 100, 100, 0.4);
+            white-space: nowrap;
+            pointer-events: none;
+            user-select: none;
         }
         .part-title {
             background: var(--primary-color);
@@ -191,7 +211,7 @@
     <h1>コーデリスト</h1>
 
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="コーデ名や型番で検索 (例: PM1-023)">
+        <input type="text" id="searchInput" placeholder="コーデ名や型番で検索 (例: PM1-001)">
     </div>
 
     <div class="series-menu" id="seriesMenu">
@@ -478,7 +498,10 @@
                 partsContainer.innerHTML += `
                     <div class="part-box">
                         <div class="part-title">${part.type}</div>
-                        <img src="${part.image}" alt="${part.type}">
+                        <div class="part-img-wrapper">
+                            <img src="${part.image}" alt="${part.type}">
+                            <div class="watermark">転載禁止</div>
+                        </div>
                         <div style="font-size: 10px; margin-top:3px; font-weight:bold;">${part.code}</div>
                     </div>
                 `;
